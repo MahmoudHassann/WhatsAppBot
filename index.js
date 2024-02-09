@@ -5,7 +5,7 @@ const fs = require("fs");
 
 const client = new Client({
   puppeteer:{
-    headless:true
+    headless:false
   },
   authStrategy: new LocalAuth({
     /* clientId: "Bot ID" */
