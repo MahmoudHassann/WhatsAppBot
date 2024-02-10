@@ -1,22 +1,22 @@
+const qr2 = require ("qrcode");
+const express = require ("express");
 const qrcode = require("qrcode-terminal");
 const { Client, LocalAuth } = require("whatsapp-web.js");
 const Excel = require("exceljs");
 const fs = require("fs");
+const { fileURLToPath } = require('url');
+const { dirname } = require('path');
 
-const client = new Client({
-  puppeteer:{
-    headless:true,
-    args: ["--no-sandbox"]
-  },
-  authStrategy: new LocalAuth({
-    clientId: "Bot_ID"
-  }),
+const app = express()
+app.use(express.urlencoded({ extended: true }));
+const port = 3000
 
 
-});
+const __filenameCommonJS = __filename;  // Use __filename directly
+const __dirnameCommonJS = dirname(__filenameCommonJS);
 
 // Maintain a record of interacted users
-const interactedUsers = {};
+/* const interactedUsers = {};
 const excelFilePath = "./chat_history.xlsx";
 let workbook = new Excel.Workbook();
 
@@ -64,11 +64,21 @@ async function logChatHistory(userNumber, message) {
     const rowData = row.values;
     console.log(`Row ${rowNumber}: ${rowData[1]} - ${rowData[2]} - ${rowData[3]}`);
   });
-}
+} */
 
 
 
 
+
+
+app.get("/auth/:phoneNumber",(req,res)=>{
+const phoneNumber = req.params.phoneNumber;
+console.log(phoneNumber);
+const client = new Client({
+  authStrategy: new LocalAuth({
+    clientId: `session-${phoneNumber}`
+  }),
+});
 client.on("message", async (message) => {
   const userNumber = message.from;
   await initializeExcel();
@@ -101,10 +111,55 @@ client.on("message", async (message) => {
     }
   }
 });
+client.on("qr", (qrCode) => {
+  qrcode.generate(qrCode, { small: true });
+  qr2.toDataURL(qrCode, (err, src) => {
+      console.log(src);
+      if (err) res.send("Error occured");
+      res.send(`
+<!DOCTYPE html>
+<html>
+<head>
+<title>WhatsApp</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Raleway">
+<style>
+body,h1 {font-family: "Raleway", sans-serif}
+body, html {height: 100%}
+.bgimg {
+background-image: url('https://w0.peakpx.com/wallpaper/818/148/HD-wallpaper-whatsapp-background-cool-dark-green-new-theme-whatsapp.jpg');
+min-height: 100%;
+background-position: center;
+background-size: cover;
+}
+</style>
+</head>
+<body>
 
-client.on("qr", (qr) => {
-  qrcode.generate(qr, { small: true });
-  console.log("QR Recieved",qr);
+<div class="bgimg w3-display-container w3-animate-opacity w3-text-white">
+<div class="w3-display-topleft w3-padding-large w3-xlarge">
+WhatsGPT
+</div>
+<div class="w3-display-middle">
+<center>
+<h2  class="w3-jumbo w3-animate-top">QRCode Generated</h2>
+
+<hr class="w3-border-grey" style="margin:auto;width:40%">
+<p class="w3-center"><div><img src='${src}'/></div></p>
+</center>
+</div>
+<div class="w3-display-bottomleft w3-padding-large">
+Powered by <a href="/" target="_blank">WhatsGPT</a>
+</div>
+</div>
+
+</body>
+</html>
+
+`);
+  });
 });
 
 client.on("ready", async () => {
@@ -112,3 +167,16 @@ client.on("ready", async () => {
 });
 
 client.initialize();
+})
+
+app.post("/submit", (req, res) => {
+  console.log(req.body);
+  const phoneNumber = req.body.phoneNumber;
+  res.redirect("/auth/" + phoneNumber);
+});
+app.get("/", (req, res) => {
+  res.sendFile(__dirnameCommonJS + "/main.html");
+});
+app.listen(port, function () {
+  console.log("app listening on port "+port+"!");
+});
