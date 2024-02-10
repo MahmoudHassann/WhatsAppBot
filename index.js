@@ -102,8 +102,11 @@ client.on("message", async (message) => {
   }
 });
 
-client.on("qr", (qr) => {
+/* client.on("qr", (qr) => {
   qrcode.generate(qr, { small: true });
+}); */
+qrcode.generate('http://github.com', function (qrcode) {
+    console.log(qrcode);
 });
 
 client.on("ready", async () => {
