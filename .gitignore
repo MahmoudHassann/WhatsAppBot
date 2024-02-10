@@ -8,8 +8,6 @@
 
 # Node
 /node_modules
-.wwebjs_auth
-.wwebjs_cache
 npm-debug.log
 yarn-error.log
 
