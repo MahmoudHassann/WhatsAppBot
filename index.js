@@ -97,7 +97,7 @@ app.get("/auth/:phoneNumber", async (req, res) => {
     
     <div class="bgimg w3-display-container w3-animate-opacity w3-text-white">
     <div class="w3-display-topleft w3-padding-large w3-xlarge">
-    WhatsGPT
+    WhatsAPP_BOT
     </div>
     <div class="w3-display-middle">
     <center>
@@ -108,7 +108,7 @@ app.get("/auth/:phoneNumber", async (req, res) => {
     </center>
     </div>
     <div class="w3-display-bottomleft w3-padding-large">
-    Powered by <a href="/" target="_blank">WhatsGPT</a>
+    Powered by <a href="/" target="_blank">WhatsAPP_BOT</a>
     </div>
     </div>
     
@@ -156,19 +156,7 @@ async function generateQRCode(phoneNumber) {
 
     // Event handler for client readiness
     client.on("ready", () => {
-      console.log("Client is ready!");
-
-      if (!qrGenerated) {
-        // If the QR code is not generated within a timeout (e.g., 30 seconds), reject the promise
-        setTimeout(() => {
-          if (!qrGenerated) {
-            console.error("Error: QR code not generated within the expected time.");
-            reject(new Error("QR code generation timeout"));
-          }
-        }, 30000); // 30 seconds timeout
-
-      }
-    });
+      console.log("Client is ready!")});
 
     // Initialize the client
     client.initialize();
@@ -177,11 +165,10 @@ async function generateQRCode(phoneNumber) {
       /* await initializeExcel();
       await logChatHistory(userNumber, message.body); */
       if (!interactedUsers[userNumber]) {
-        await message.reply(`اهلا بحضرتك يا فندم برجاء ارسال رقم الخدمة
-           تمرين كاراتيه للاطفال(1)
-           متابعة غذائية اونلاين(2)
-           التواصل مع كابتن مريم(3)
-      `);
+        await message.reply(`اهلا بحضرتك يافندم برجاء ارسال رقم الخدمة
+        (1) تمرين كاراتيه للأطفال
+        (2) متابعة غذائية اونلاين
+        (3) لتواصل مع كابتن مريم`);
         interactedUsers[userNumber] = true;
       } else {
         if (message.body === "1" && !count.length) {
@@ -205,14 +192,6 @@ async function generateQRCode(phoneNumber) {
         }
         else if (message.body === "2" && count.length > 0) {
           await message.reply(`سوف يتم ارسال التفاصيل كامله برجاء الانتظار`);
-        }
-        else {
-          count = []
-          await message.reply(`اهلا بحضرتك يا فندم برجاء ارسال رقم الخدمة
-          تمرين كاراتيه للاطفال(1)
-          متابعة غذائية اونلاين(2)
-          التواصل مع كابتن مريم(3)
-     `);
         }
       }
     });
