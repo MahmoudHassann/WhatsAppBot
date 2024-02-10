@@ -128,9 +128,6 @@ app.get("/auth/:phoneNumber", async (req, res) => {
 async function generateQRCode(phoneNumber) {
   return new Promise(async (resolve, reject) => {
     const client = new Client({
-      puppeteer:({
-        headless:true,
-      }),
       authStrategy: new LocalAuth({
         clientId: `session-${phoneNumber}`
       }),
