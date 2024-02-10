@@ -8,7 +8,7 @@ const client = new Client({
     headless:false
   },
   authStrategy: new LocalAuth({
-    clientId: "Bot ID"
+    clientId: "Bot_ID"
   }),
 
 
