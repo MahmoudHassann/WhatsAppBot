@@ -1,5 +1,5 @@
-const qr2 = require ("qrcode");
-const express = require ("express");
+const qr2 = require("qrcode");
+const express = require("express");
 const qrcode = require("qrcode-terminal");
 const { Client, LocalAuth } = require("whatsapp-web.js");
 const Excel = require("exceljs");
@@ -16,8 +16,8 @@ const __filenameCommonJS = __filename;  // Use __filename directly
 const __dirnameCommonJS = dirname(__filenameCommonJS);
 
 // Maintain a record of interacted users
-/* const interactedUsers = {};
-const excelFilePath = "./chat_history.xlsx";
+const interactedUsers = {};
+/*const excelFilePath = "./chat_history.xlsx";
 let workbook = new Excel.Workbook();
 
 async function initializeExcel() {
@@ -71,49 +71,64 @@ async function logChatHistory(userNumber, message) {
 
 
 
-app.get("/auth/:phoneNumber",(req,res)=>{
-const phoneNumber = req.params.phoneNumber;
-console.log(phoneNumber);
-const client = new Client({
-  authStrategy: new LocalAuth({
-    clientId: `session-${phoneNumber}`
-  }),
-});
-client.on("message", async (message) => {
-  const userNumber = message.from;
-  await initializeExcel();
-  await logChatHistory(userNumber, message.body);
-  if (!interactedUsers[userNumber]) {
-    await message.reply(`
-        اهلا بحضرتك يا فندم برجاء ارسال رقم الخدمة
+app.get("/auth/:phoneNumber", (req, res) => {
+  let count = []
+  const phoneNumber = req.params.phoneNumber;
+  console.log(phoneNumber);
+  const client = new Client({
+    authStrategy: new LocalAuth({
+      clientId: `session-${phoneNumber}`
+    }),
+  });
+  client.on("message", async (message) => {
+    const userNumber = message.from;
+    /* await initializeExcel();
+    await logChatHistory(userNumber, message.body); */
+    if (!interactedUsers[userNumber]) {
+      await message.reply(`اهلا بحضرتك يا فندم برجاء ارسال رقم الخدمة
          تمرين كاراتيه للاطفال(1)
          متابعة غذائية اونلاين(2)
          التواصل مع كابتن مريم(3)
     `);
-    interactedUsers[userNumber] = true;
-  } else {
-    if (message.body === "!ping") {
-      await message.reply("pong");
-    } else if (message.body === "1") {
-      await message.reply(`
-          برجاء ارسال العنوان
-      `);
+      interactedUsers[userNumber] = true;
+    } else {
+      console.log(count.length);
+      if (message.body === "1" && !count.length) {
+        count = []
+        await message.reply(`برجاء ارسال العنوان`);
+      } else if (message.body === "2" && !count.length) {
+        count.push(message.body)
+        console.log(count.length);
+        await message.reply(`تفاصيل متابعه التغذيه
+        (1.)مكالمه مع كابتن مريم بعد دفع الاشتراك وملئ الفورم
+        (2.)متابعه يوميه مع تصوير الاكل علي واتساب
+        (3.)تغير النظام الغذائي كل ١٥ يوم
+        سعر الاشتراك اول مره 250ج
+        كل اسبوعين 100`);
+      }
+      else if (message.body === "3" && !count.length) {
+        count = []
+        await message.reply(`سيب استفسار حضرتك وسوف يتم الرد عليك من قبل كابتن مريم`);
+      }
+      else if (message.body === "1" && count.length > 0) {
+        await message.reply(`الدفع عن طريق خدمة فودافون كاش رقم الدفع 010000`);
+      }
+      else if (message.body === "2" && count.length > 0) {
+        await message.reply(`سوف يتم ارسال التفاصيل كامله برجاء الانتظار`);
+      }
+      else {
+        count = []
+        await message.reply(`اهلا بحضرتك يا فندم برجاء ارسال رقم الخدمة
+        تمرين كاراتيه للاطفال(1)
+        متابعة غذائية اونلاين(2)
+        التواصل مع كابتن مريم(3)
+   `);
+      }
     }
-    else if (message.body === "2") {
-      await message.reply(`
-          املا بيانات الفورم دا
-      `);
-    }
-    else if (message.body === "3") {
-      await message.reply(`
-          سيب استفسار حضرتك وسوف يتم الرد عليك من قبل كابتن مريم
-      `);
-    }
-  }
-});
-client.on("qr", (qrCode) => {
-  qrcode.generate(qrCode, { small: true });
-  qr2.toDataURL(qrCode, (err, src) => {
+  });
+  client.on("qr", (qrCode) => {
+    qrcode.generate(qrCode, { small: true });
+    qr2.toDataURL(qrCode, (err, src) => {
       console.log(src);
       if (err) res.send("Error occured");
       res.send(`
@@ -159,14 +174,14 @@ Powered by <a href="/" target="_blank">WhatsGPT</a>
 </html>
 
 `);
+    });
   });
-});
 
-client.on("ready", async () => {
-  console.log("Client is ready!");
-});
+  client.on("ready", async () => {
+    console.log("Client is ready!");
+  });
 
-client.initialize();
+  client.initialize();
 })
 
 app.post("/submit", (req, res) => {
@@ -178,5 +193,5 @@ app.get("/", (req, res) => {
   res.sendFile(__dirnameCommonJS + "/main.html");
 });
 app.listen(port, function () {
-  console.log("app listening on port "+port+"!");
+  console.log("app listening on port " + port + "!");
 });
