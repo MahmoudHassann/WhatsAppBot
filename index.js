@@ -68,7 +68,7 @@ async function logChatHistory(userNumber, message) {
 } */
 let count = []
 app.get("/auth/:phoneNumber", async (req, res) => {
-  
+
   const phoneNumber = req.params.phoneNumber;
   console.log(phoneNumber);
   try {
@@ -121,18 +121,23 @@ app.get("/auth/:phoneNumber", async (req, res) => {
     console.error("Error generating QR code:", error);
     res.status(500).send("Internal Server Error");
   }
-     
-  });
-  
-  
+
+});
+
+
 
 async function generateQRCode(phoneNumber) {
   return new Promise(async (resolve, reject) => {
-    const client = new Client({
-      puppeteer:execPath('/usr/bin/chromium-browser'),
-      authStrategy: new LocalAuth({
-        clientId: `session-${phoneNumber}`
-      }),
+    const client = new Client; ({
+      puppeteer: {
+        args: [
+          '--no-sandbox',
+          '--disable-setuid-sandbox'
+        ],
+        authStrategy: new LocalAuth({
+          clientId: `session-${phoneNumber}`
+        }),
+      }
     });
 
     let qrGenerated = false;
@@ -154,11 +159,12 @@ async function generateQRCode(phoneNumber) {
         reject(err);
       }
     });
-    
+
 
     // Event handler for client readiness
     client.on("ready", () => {
-      console.log("Client is ready!")});
+      console.log("Client is ready!")
+    });
 
     // Initialize the client
     client.initialize();
