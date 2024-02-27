@@ -9,7 +9,7 @@ const { dirname } = require('path');
 
 const app = express()
 app.use(express.urlencoded({ extended: true }));
-const port = 80
+const port = 3000
 
 
 const __filenameCommonJS = __filename;  // Use __filename directly
