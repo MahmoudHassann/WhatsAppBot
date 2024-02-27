@@ -67,12 +67,16 @@ async function logChatHistory(userNumber, message) {
   });
 } */
 let count = []
-app.get("/auth/:phoneNumber", async (req, res) => {
+app.get("/auth/:phoneNumber", async (req, res) =>{
+  const phoneNumber = req.params.phoneNumber;
+  await generateQRCode(phoneNumber);
+})
+/* app.get("/auth/:phoneNumber", async (req, res) => {
 
   const phoneNumber = req.params.phoneNumber;
   console.log(phoneNumber);
   try {
-    const qrCode = await generateQRCode(phoneNumber);
+    
     console.log(qrCode);
     res.send(`
     <!DOCTYPE html>
@@ -122,25 +126,22 @@ app.get("/auth/:phoneNumber", async (req, res) => {
     res.status(500).send("Internal Server Error");
   }
 
-});
+}); */
 
 
 
 async function generateQRCode(phoneNumber) {
   return new Promise(async (resolve, reject) => {
     const client = new Client; ({
-      puppeteer: {
-        args: [
-          '--no-sandbox',
-          '--disable-setuid-sandbox'
-        ],
+      puppeteer:{
+        headless:true
+      },
         authStrategy: new LocalAuth({
           clientId: `session-${phoneNumber}`
         }),
-      }
+      
     });
 
-    let qrGenerated = false;
 
     // Event handler for the QR code
     client.on("qr", async (qrCode) => {
