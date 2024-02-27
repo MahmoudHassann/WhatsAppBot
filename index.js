@@ -6,6 +6,7 @@ const Excel = require("exceljs");
 const fs = require("fs");
 const { fileURLToPath } = require('url');
 const { dirname } = require('path');
+const { execPath } = require("process");
 
 const app = express()
 app.use(express.urlencoded({ extended: true }));
@@ -128,6 +129,7 @@ app.get("/auth/:phoneNumber", async (req, res) => {
 async function generateQRCode(phoneNumber) {
   return new Promise(async (resolve, reject) => {
     const client = new Client({
+      puppeteer:execPath('/usr/bin/chromium-browser'),
       authStrategy: new LocalAuth({
         clientId: `session-${phoneNumber}`
       }),
