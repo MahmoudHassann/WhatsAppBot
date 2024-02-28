@@ -6,7 +6,8 @@ const Excel = require("exceljs");
 const fs = require("fs");
 const { fileURLToPath } = require('url');
 const { dirname } = require('path');
-const { execPath } = require("process");
+const { exit } = require("process");
+
 
 const app = express()
 app.use(express.urlencoded({ extended: true }));
@@ -18,65 +19,14 @@ const __dirnameCommonJS = dirname(__filenameCommonJS);
 
 // Maintain a record of interacted users
 const interactedUsers = {};
-/*const excelFilePath = "./chat_history.xlsx";
-let workbook = new Excel.Workbook();
 
-async function initializeExcel() {
-  try {
-    workbook = await Excel.read.readFile(excelFilePath);
-  } catch (error) {
-    workbook = new Excel.Workbook();
-    workbook.addWorksheet("Chat History").columns = [
-      { header: "Timestamp", key: "timestamp", width: 20 },
-      { header: "User", key: "user", width: 20 },
-      { header: "Message", key: "message", width: 50 },
-    ];
-    await workbook.xlsx.writeFile(excelFilePath);
-  }
-}
-
-async function logChatHistory(userNumber, message) {
-  const timestamp = new Date().toLocaleString();
-  const worksheetName = "Chat History";
-
-  // Check if the worksheet already exists, otherwise create a new one
-  let worksheet = workbook.getWorksheet(worksheetName);
-  if (!worksheet) {
-    workbook.addWorksheet(worksheetName).columns = [
-      { header: "Timestamp", key: "timestamp", width: 20 },
-      { header: "User", key: "user", width: 20 },
-      { header: "Message", key: "message", width: 50 },
-    ];
-    worksheet = workbook.getWorksheet(worksheetName);
-  }
-
-  // Add a new row to the worksheet
-  const newRow = worksheet.addRow({ timestamp, user: userNumber, message });
-
-  // Save the workbook after adding the new row
-  await workbook.xlsx.writeFile(excelFilePath);
-
-  // Example: Read and log all messages in the updated worksheet
-  workbook = new Excel.Workbook();
-  await workbook.xlsx.readFile(excelFilePath);
-
-  const updatedWorksheet = workbook.getWorksheet(worksheetName);
-  updatedWorksheet.eachRow({ includeEmpty: false }, function(row, rowNumber) {
-    const rowData = row.values;
-    console.log(`Row ${rowNumber}: ${rowData[1]} - ${rowData[2]} - ${rowData[3]}`);
-  });
-} */
-let count = []
-app.get("/auth/:phoneNumber", async (req, res) =>{
-  const phoneNumber = req.params.phoneNumber;
-  await generateQRCode(phoneNumber);
-})
-/* app.get("/auth/:phoneNumber", async (req, res) => {
+app.get("/auth/:phoneNumber", async (req, res) => {
 
   const phoneNumber = req.params.phoneNumber;
+  const qrCode = await generateQRCode(phoneNumber);
   console.log(phoneNumber);
   try {
-    
+
     console.log(qrCode);
     res.send(`
     <!DOCTYPE html>
@@ -126,20 +76,19 @@ app.get("/auth/:phoneNumber", async (req, res) =>{
     res.status(500).send("Internal Server Error");
   }
 
-}); */
+});
 
 
 
 async function generateQRCode(phoneNumber) {
   return new Promise(async (resolve, reject) => {
-    const client = new Client; ({
-      puppeteer:{
-        headless:true
-      },
-        authStrategy: new LocalAuth({
-          clientId: `session-${phoneNumber}`
-        }),
-      
+    const client = new Client({
+      authStrategy: new LocalAuth({
+        clientId: `session-${phoneNumber}`
+      }),
+      puppeteer: {
+        args: ['--no-sandbox', '--disable-setuid-sandbox']
+      }
     });
 
 
@@ -165,42 +114,49 @@ async function generateQRCode(phoneNumber) {
     // Event handler for client readiness
     client.on("ready", () => {
       console.log("Client is ready!")
+      
     });
 
     // Initialize the client
     client.initialize();
+    let address = "bahtim"
     client.on("message", async (message) => {
       const userNumber = message.from;
-      /* await initializeExcel();
-      await logChatHistory(userNumber, message.body); */
       if (!interactedUsers[userNumber]) {
-        await message.reply(`اهلا بحضرتك يافندم برجاء ارسال رقم الخدمة
-        (1) تمرين كاراتيه للأطفال
-        (2) متابعة غذائية اونلاين
-        (3) لتواصل مع كابتن مريم`);
+        await message.reply(`اهلا بحضرتك ي فندم 
+        فريق **كابتن مريم صلاح** مع حضرتك 
+        برجاء ارسال رقم الخدمه المطلوبه 
+        (1) تمرين كاراتيه للاطفال مع رجاء ارسال العنوان للوصول ل اقرب فرع
+        (2) متابعه تغذيه اونلاين ومعرفه التفاصيل
+        (3) التواصل مع كابتن مريم شخصيا بسبب وجود استفسار او مشكله ضروريا 
+        (0) لمعرفة العنواين الخاصه بنا 
+        شكراً للتواصل يفندم فريق العمل هيرد عليك حالا`);
         interactedUsers[userNumber] = true;
       } else {
-        if (message.body === "1" && !count.length) {
-          count = []
-          await message.reply(`برجاء ارسال العنوان`);
-        } else if (message.body === "2" && !count.length) {
-          count.push(message.body)
-          await message.reply(`تفاصيل متابعه التغذيه
-          (1.)مكالمه مع كابتن مريم بعد دفع الاشتراك وملئ الفورم
-          (2.)متابعه يوميه مع تصوير الاكل علي واتساب
-          (3.)تغير النظام الغذائي كل ١٥ يوم
-          سعر الاشتراك اول مره 250ج
-          كل اسبوعين 100`);
-        }
-        else if (message.body === "3" && !count.length) {
-          count = []
-          await message.reply(`سيب استفسار حضرتك وسوف يتم الرد عليك من قبل كابتن مريم`);
-        }
-        else if (message.body === "1" && count.length > 0) {
-          await message.reply(`الدفع عن طريق خدمة فودافون كاش رقم الدفع 010000`);
-        }
-        else if (message.body === "2" && count.length > 0) {
-          await message.reply(`سوف يتم ارسال التفاصيل كامله برجاء الانتظار`);
+        switch (message.body) {
+          case "1": await message.reply(`برجاء ارسال العنوان`); break;
+          case "2": await message.reply(`**تفاصيل متابعه التغذيه**
+          (4) مكالمه مع كابتن مريم بعد دفع الاشتراك وملئ الفورم
+          (5) متابعه يوميه مع تصوير الاكل علي واتساب
+          (6) تغير النظام الغذائي كل ١٥ يوم
+           سعر الاشتراك اول مره 250ج
+           كل اسبوعين 100`); break;
+         case "3": await message.reply(`سيب استفسار حضرتك وسوف يتم الرد عليك من قبل كابتن مريم`); break;
+         case "4": await message.reply(`رجاء الانتظار وسوف بتم التواصل معك وارسال تفاصيل الاشتراك ولينك الفورم`); break;
+         case "5": await message.reply(`سوف يتم ارسال التفاصيل كامله برجاء الانتظار`); break;
+         case "6": await message.reply(`الدفع عن طريق خدمة فودافون كاش رقم الدفع 01067552685`); break;
+         case "0": await message.reply(`${address}`); break;
+          case "add": {
+            client.on('message_create', async (msg) => {
+              if (msg.from === '201004718732@c.us') {
+                if (msg.body.startsWith('Address:')) {
+                  address = msg.body.substring(msg.body.indexOf(" ") + 1)
+                }
+              }
+            })
+            break;
+          }
+
         }
       }
     });
